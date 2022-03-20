@@ -21,7 +21,6 @@ public class VehicleController {
     	try {
              vehicleService.addVehicle(vehicle);
         }catch (Exception exception){
-        	System.out.println(exception);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,exception.getMessage());
             
         }
