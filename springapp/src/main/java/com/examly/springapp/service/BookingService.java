@@ -4,6 +4,7 @@ import com.examly.springapp.entity.Booking;
 import com.examly.springapp.entity.Passenger;
 import com.examly.springapp.entity.User;
 import com.examly.springapp.entity.Vehicle;
+import com.examly.springapp.model.*;
 import com.examly.springapp.repository.BookingRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -19,67 +21,59 @@ public class BookingService {
     private final VehicleService vehicleService;
     private final ApplicationUserDetailsService applicationUserDetailsService;
 
-    public List<Booking> getAllBooking() {
+    public List<GetAllBookingResponse> getAllBooking() {
         User currentLoggedInUser = applicationUserDetailsService.getCurrentLoggedInUser();
-        return bookingRepository.findByUserId(currentLoggedInUser.getId());
+        return bookingRepository.findByUserId(currentLoggedInUser.getId()).stream().map(GetAllBookingResponse::new).collect(Collectors.toList());
     }
 
     @Transactional
-    public Booking createBooking(int vehicleId, Booking booking){
-
-        Optional<Vehicle> vehicleOptional = vehicleService.findById(vehicleId);
-        if (vehicleOptional.isEmpty()) throw new IllegalStateException("Vehicle is not present");
-        Vehicle vehicle = vehicleOptional.get();
+    public CreateBookingResponse createBooking(int vehicleId, CreateBookingRequest createBookingRequest){
+        Vehicle vehicle = vehicleService.findById(vehicleId).orElse(null);
+        if (vehicle == null) throw new IllegalStateException("Vehicle is not present");
         if (!vehicle.getAvailableStatus().equalsIgnoreCase("Available")) throw new IllegalStateException(vehicle.getName()+" is not available to book");
-        if (booking.getNumberOfPassenger() != booking.getPassengers().size()) throw new IllegalStateException("Number of passenger and list of passenger is not matched");
-        if (booking.getNumberOfPassenger() > vehicle.getCapacity()) throw new IllegalStateException("Passenger capacity exceeded");
+        if (createBookingRequest.getNumberOfPassenger() != createBookingRequest.getPassengers().size()) throw new IllegalStateException("Number of passenger and list of passenger is not matched");
+        if (createBookingRequest.getNumberOfPassenger() > vehicle.getCapacity()) throw new IllegalStateException("Passenger capacity exceeded");
         User currentLoggedInUser = applicationUserDetailsService.getCurrentLoggedInUser();
-        Set<Passenger> passengers = booking.getPassengers();
-        booking.setVehicle(vehicle);
-        booking.setUser(currentLoggedInUser);
-        booking.setPassengers(passengers);
+        Set<PassengerRequest> passengerRequest = createBookingRequest.getPassengers();
+        Set<Passenger> passengers = passengerRequest.stream().map(Passenger::new).collect(Collectors.toSet());
+        Booking newBooking = new Booking(createBookingRequest, currentLoggedInUser, vehicle, passengers);
         for (Passenger passenger : passengers){
-            passenger.setBooking(booking);
+            passenger.setBooking(newBooking);
         }
-        Booking newBooking = bookingRepository.save(booking);
+        bookingRepository.save(newBooking);
         modifyVehicleCapacity(newBooking, "createBooking");
-        modifyVehicleAvailability(booking);
+        modifyVehicleAvailability(newBooking);
 
-        return newBooking;
+        return new CreateBookingResponse(newBooking);
     }
 
 
     @Transactional
     public int cancelBooking(int bookingId) {
         int currentUserId = applicationUserDetailsService.getCurrentLoggedInUser().getId();
-        Optional<Booking> currentBookingOptional = bookingRepository.findByUserIdAndId(currentUserId,bookingId);
-        boolean bookingPresent = currentBookingOptional.isPresent();
-        if (!bookingPresent) throw new IllegalStateException("Couldn't find requested booking");
-        Booking currentBooking = currentBookingOptional.get();
-        modifyVehicleCapacity(currentBooking, "deleteBooking");
-        modifyVehicleAvailability(currentBooking);
+        Booking existedBooking = bookingRepository.findByUserIdAndId(currentUserId,bookingId).orElse(null);
+        if (existedBooking == null) throw new IllegalStateException("Couldn't find requested booking");
+        modifyVehicleCapacity(existedBooking, "deleteBooking");
+        modifyVehicleAvailability(existedBooking);
         bookingRepository.deleteById(bookingId);
 
         return bookingId;
     }
 
     @Transactional
-    public Booking editBooking(int bookingId, Booking updatedBooking) {
+    public EditBookingResponse editBooking(int bookingId, EditBookingRequest editBookingRequest) {
         int currentUserId = applicationUserDetailsService.getCurrentLoggedInUser().getId();
-        Optional<Booking> currentBookingOptional = bookingRepository.findByUserIdAndId(currentUserId,bookingId);
-        boolean bookingPresent = currentBookingOptional.isPresent();
-        if (!bookingPresent) throw new IllegalStateException("Couldn't find requested booking");
-        Booking currentBooking = currentBookingOptional.get();
-        currentBooking.setFromDate(updatedBooking.getFromDate());
-        currentBooking.setToDate(updatedBooking.getToDate());
-        bookingRepository.save(currentBooking);
+        Booking existedBooking = bookingRepository.findByUserIdAndId(currentUserId,bookingId).orElse(null);
+        if (existedBooking == null) throw new IllegalStateException("Couldn't find requested booking");
+        existedBooking.setFromDate(editBookingRequest.getFromDate());
+        existedBooking.setToDate(editBookingRequest.getToDate());
+        bookingRepository.save(existedBooking);
 
-        return currentBooking;
+        return new EditBookingResponse(existedBooking);
     }
 
     public void modifyVehicleCapacity(Booking booking, String operation){
         Vehicle vehicle = booking.getVehicle();
-        int vehicleId = vehicle.getId();
         int vehicleCapacity = vehicle.getCapacity();
         int noOfPassengersInBooking = booking.getNumberOfPassenger();
         if (operation.equals("deleteBooking")){
@@ -88,12 +82,12 @@ public class BookingService {
         else if(operation.equals("createBooking")){
             vehicle.setCapacity(vehicleCapacity - noOfPassengersInBooking);
         }
-        vehicleService.editVehicle(vehicleId,vehicle);
+        EditVehicleRequest editVehicleRequest = new EditVehicleRequest(vehicle.getName(), vehicle.getImageUrl(), vehicle.getAddress(), vehicle.getDescription(), vehicle.getAvailableStatus(), vehicle.getTime(), vehicle.getCapacity(), vehicle.getTicketPrice());
+        vehicleService.editVehicle(vehicle.getId(),editVehicleRequest);
     }
 
     public void modifyVehicleAvailability(Booking booking){
         Vehicle vehicle = booking.getVehicle();
-        int vehicleId = vehicle.getId();
         int vehicleCapacity = vehicle.getCapacity();
         if (vehicleCapacity == 0 ){
             vehicle.setAvailableStatus("Unavailable");
@@ -101,6 +95,7 @@ public class BookingService {
         else if (vehicleCapacity > 0) {
             vehicle.setAvailableStatus("Available");
         }
-        vehicleService.editVehicle(vehicleId,vehicle);
+        EditVehicleRequest editVehicleRequest = new EditVehicleRequest(vehicle.getName(), vehicle.getImageUrl(), vehicle.getAddress(), vehicle.getDescription(), vehicle.getAvailableStatus(), vehicle.getTime(), vehicle.getCapacity(), vehicle.getTicketPrice());
+        vehicleService.editVehicle(vehicle.getId(),editVehicleRequest);
     }
 }

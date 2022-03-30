@@ -1,22 +1,13 @@
 package com.examly.springapp.service;
 
 import com.examly.springapp.entity.User;
-import com.examly.springapp.model.LoginModel;
-import com.examly.springapp.model.UserDetailsResponseModel;
 import com.examly.springapp.repository.UserRepository;
-import com.examly.springapp.security.jwt.JwtUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service

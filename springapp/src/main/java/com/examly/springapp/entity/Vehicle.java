@@ -1,5 +1,7 @@
 package com.examly.springapp.entity;
 
+import com.examly.springapp.model.AddVehicleRequest;
+import com.examly.springapp.utility.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,7 +51,7 @@ public class Vehicle {
     @Column(name = "ticket_price")
     private double ticketPrice;
 
-    public Vehicle(String name, String imageUrl, String address, String description, String availableStatus, Time time, int capacity, double ticketPrice) {
+    private Vehicle(String name, String imageUrl, String address, String description, String availableStatus, Time time, int capacity, double ticketPrice) {
         this.name = name;
         this.imageUrl = imageUrl;
         this.address = address;
@@ -58,5 +60,9 @@ public class Vehicle {
         this.time = time;
         this.capacity = capacity;
         this.ticketPrice = ticketPrice;
+    }
+
+    public Vehicle(AddVehicleRequest addVehicleRequest) {
+        this(StringUtils.capitalize(addVehicleRequest.getName()),addVehicleRequest.getImageUrl(),addVehicleRequest.getAddress(),addVehicleRequest.getDescription(),addVehicleRequest.getAvailableStatus(),addVehicleRequest.getTime(),addVehicleRequest.getCapacity(),addVehicleRequest.getTicketPrice());
     }
 }

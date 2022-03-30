@@ -1,8 +1,8 @@
 package com.examly.springapp.security.jwt;
 
 import com.examly.springapp.entity.User;
-import com.examly.springapp.model.LoginModel;
-import com.examly.springapp.model.UserDetailsResponseModel;
+import com.examly.springapp.model.LoginRequest;
+import com.examly.springapp.model.LoginResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,8 +31,8 @@ public class JwtUsernamePasswordAuthenticationFilter extends UsernamePasswordAut
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-            LoginModel loginModel = new ObjectMapper().readValue(request.getInputStream(), LoginModel.class);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(loginModel.getEmail(),loginModel.getPassword());
+            LoginRequest loginRequest = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
             return authenticationManager.authenticate(authentication);
 
         } catch (IOException e) {
@@ -48,15 +48,9 @@ public class JwtUsernamePasswordAuthenticationFilter extends UsernamePasswordAut
         response.addHeader("Authorization", "Bearer "+token);
 
         User userObject = (User) authResult.getPrincipal();
-        UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel(
-                userObject.getId(),
-                userObject.getEmail(),
-                userObject.getName(),
-                userObject.getMobileNumber(),
-                userObject.getUserRole()
-        );
+        LoginResponse loginResponse = new LoginResponse(userObject);
         response.setHeader(HttpHeaders.CONTENT_TYPE,"application/json");
-        response.getOutputStream().print(new ObjectMapper().writeValueAsString(userDetailsResponseModel));
+        response.getOutputStream().print(new ObjectMapper().writeValueAsString(loginResponse));
         response.flushBuffer();
     }
 }

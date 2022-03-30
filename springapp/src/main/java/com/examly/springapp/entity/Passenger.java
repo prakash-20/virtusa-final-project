@@ -1,5 +1,6 @@
 package com.examly.springapp.entity;
 
+import com.examly.springapp.model.PassengerRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,10 +38,14 @@ public class Passenger {
     @JoinColumn(name = "booking_id", referencedColumnName = "id", nullable = false)
     private Booking booking;
 
-    public Passenger(String firstName, String lastName, String gender, int age) {
+    private Passenger(String firstName, String lastName, String gender, int age) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.gender = gender;
         this.age = age;
+    }
+
+    public Passenger(PassengerRequest passengerRequest) {
+        this(passengerRequest.getFirstName(),passengerRequest.getLastName(),passengerRequest.getGender(),passengerRequest.getAge());
     }
 }

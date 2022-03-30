@@ -1,5 +1,6 @@
 package com.examly.springapp.entity;
 
+import com.examly.springapp.model.CreateBookingRequest;
 import lombok.*;
 import javax.persistence.*;
 import java.sql.Date;
@@ -52,10 +53,17 @@ public class Booking {
     private Set<Passenger> passengers = new HashSet<Passenger>();
 
 
-    public Booking(Date fromDate, Date toDate, int numberOfPassenger, double totalPrice) {
+    private Booking(Date fromDate, Date toDate, int numberOfPassenger, double totalPrice) {
         this.fromDate = fromDate;
         this.toDate = toDate;
         this.numberOfPassenger = numberOfPassenger;
         this.totalPrice = totalPrice;
+    }
+
+    public Booking(CreateBookingRequest createBookingRequest, User user, Vehicle vehicle, Set<Passenger> passengers) {
+        this(createBookingRequest.getFromDate(),createBookingRequest.getToDate(),createBookingRequest.getNumberOfPassenger(),createBookingRequest.getTotalPrice());
+        this.setUser(user);
+        this.setVehicle(vehicle);
+        this.setPassengers(passengers);
     }
 }

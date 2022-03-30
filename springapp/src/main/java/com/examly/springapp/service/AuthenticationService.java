@@ -1,8 +1,8 @@
 package com.examly.springapp.service;
 
 import com.examly.springapp.entity.User;
-import com.examly.springapp.model.LoginModel;
-import com.examly.springapp.model.UserDetailsResponseModel;
+import com.examly.springapp.model.LoginRequest;
+import com.examly.springapp.model.LoginResponse;
 import com.examly.springapp.repository.UserRepository;
 import com.examly.springapp.security.jwt.JwtUtil;
 import lombok.AllArgsConstructor;
@@ -33,17 +33,17 @@ public class AuthenticationService {
         return capitalize(user.getUserRole())+" added";
     }
 
-    public ResponseEntity<UserDetailsResponseModel> authentication(LoginModel loginModel) throws BadCredentialsException {
+    public ResponseEntity<LoginResponse> authentication(LoginRequest loginRequest) throws BadCredentialsException {
         try {
-            Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginModel.getEmail(), loginModel.getPassword()));
+            Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
             UserDetails userDetails = (UserDetails) authenticate.getPrincipal();
             User userObject = (User) userDetails;
-            UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel(userObject);
+            LoginResponse loginResponse = new LoginResponse(userObject);
             String token = jwtUtil.generateToken(userDetails);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.AUTHORIZATION, "Bearer "+token)
-                    .body(userDetailsResponseModel);
+                    .body(loginResponse);
 
         } catch (BadCredentialsException ex) {
             throw  new BadCredentialsException("Invalid username or password");

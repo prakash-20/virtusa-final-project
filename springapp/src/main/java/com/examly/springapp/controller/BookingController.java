@@ -1,6 +1,7 @@
 package com.examly.springapp.controller;
 
 import com.examly.springapp.entity.Booking;
+import com.examly.springapp.model.*;
 import com.examly.springapp.service.BookingService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @GetMapping(path = "/user/booking")
-    public List<Booking> getAllBooking(){
+    public List<GetAllBookingResponse> getAllBooking(){
         try {
             return bookingService.getAllBooking();
         } catch (Exception exception){
@@ -23,9 +24,9 @@ public class BookingController {
     }
 
     @PostMapping(path = "/user/booking/{vehicleId}")
-    public Booking createBooking(@PathVariable int vehicleId, @RequestBody Booking booking){
+    public CreateBookingResponse createBooking(@PathVariable int vehicleId, @RequestBody CreateBookingRequest createBookingRequest){
         try {
-            return bookingService.createBooking(vehicleId, booking);
+            return bookingService.createBooking(vehicleId, createBookingRequest);
         }
         catch (Exception exception){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,exception.getMessage());
@@ -42,9 +43,9 @@ public class BookingController {
     }
 
     @PutMapping(path = "/user/editBooking/{bookingId}")
-    public Booking editBooking(@PathVariable int bookingId, @RequestBody Booking updatedBooking){
+    public EditBookingResponse editBooking(@PathVariable int bookingId, @RequestBody EditBookingRequest editBookingRequest){
         try{
-        return bookingService.editBooking(bookingId, updatedBooking);
+        return bookingService.editBooking(bookingId, editBookingRequest);
         } catch (Exception exception){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,exception.getMessage());
         }

@@ -1,7 +1,10 @@
 package com.examly.springapp.service;
 
 import com.examly.springapp.entity.Vehicle;
+import com.examly.springapp.model.AddVehicleRequest;
+import com.examly.springapp.model.EditVehicleRequest;
 import com.examly.springapp.repository.VehicleRepository;
+import com.examly.springapp.utility.StringUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +24,8 @@ public class VehicleService {
     	return vehicleRepository.findAll();
     }
     
-    public void addVehicle(Vehicle vehicle) {
-    	vehicle.setName(capitalize(vehicle.getName()));
+    public void addVehicle(AddVehicleRequest addVehicleRequest) {
+		Vehicle vehicle = new Vehicle(addVehicleRequest);
     	boolean vehicleIsPresent = vehicleRepository.findByName(vehicle.getName()).isPresent();
     	if(vehicleIsPresent)
     		throw new IllegalStateException("The vehicle "+vehicle.getName() +" already exists");
@@ -39,35 +42,29 @@ public class VehicleService {
 
 	public Vehicle getVehicleById(int vehicleId){
 		Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
+		if(vehicle == null)
+			throw new IllegalStateException("The vehicleId "+vehicleId +" does not exist");
 		return vehicle;
 	}
     
-    public Vehicle editVehicle(int vehicleId,Vehicle newVehicle) {
+    public Vehicle editVehicle(int vehicleId, EditVehicleRequest editVehicleRequest) {
     	Vehicle oldVehicle = vehicleRepository.findById(vehicleId).orElse(null);
     	if(oldVehicle == null)
     		throw new IllegalStateException("The vehicleId "+vehicleId +" does not exist");
     	
-    	oldVehicle.setName(capitalize(newVehicle.getName()));
-    	oldVehicle.setImageUrl(newVehicle.getImageUrl());
-    	oldVehicle.setAddress(newVehicle.getAddress());
-    	oldVehicle.setDescription(newVehicle.getDescription());
-    	oldVehicle.setAvailableStatus(newVehicle.getAvailableStatus());
-    	oldVehicle.setTime(newVehicle.getTime());
-    	oldVehicle.setCapacity(newVehicle.getCapacity());
-    	oldVehicle.setTicketPrice(newVehicle.getTicketPrice());
+    	oldVehicle.setName(StringUtils.capitalize(editVehicleRequest.getName()));
+    	oldVehicle.setImageUrl(editVehicleRequest.getImageUrl());
+    	oldVehicle.setAddress(editVehicleRequest.getAddress());
+    	oldVehicle.setDescription(editVehicleRequest.getDescription());
+    	oldVehicle.setAvailableStatus(editVehicleRequest.getAvailableStatus());
+    	oldVehicle.setTime(editVehicleRequest.getTime());
+    	oldVehicle.setCapacity(editVehicleRequest.getCapacity());
+    	oldVehicle.setTicketPrice(editVehicleRequest.getTicketPrice());
     	
     	return vehicleRepository.save(oldVehicle);
     }
 
-    private String capitalize(String string) {
-    	string=string.toLowerCase().trim();
-    	char parts[]=string.toCharArray();
-    	parts[0]=(char)(parts[0]-32);
-    	for(int i=0;i<parts.length-1;i++)
-    		if(parts[i]==' ')
-    			parts[i+1]=(char)(parts[i+1]-32);
-    	return String.valueOf(parts);
-    }
+
 
     
 }

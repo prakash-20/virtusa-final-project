@@ -1,12 +1,10 @@
 package com.examly.springapp.controller;
 
 import com.examly.springapp.entity.Vehicle;
+import com.examly.springapp.model.AddVehicleRequest;
+import com.examly.springapp.model.EditVehicleRequest;
 import com.examly.springapp.service.VehicleService;
-
 import lombok.AllArgsConstructor;
-
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,9 +15,9 @@ public class VehicleController {
 	private final VehicleService vehicleService;
 
     @PostMapping("/admin/addVehicle")
-    public void addVehicle(@RequestBody Vehicle vehicle){
+    public void addVehicle(@RequestBody AddVehicleRequest addVehicleRequest){
     	try {
-             vehicleService.addVehicle(vehicle);
+             vehicleService.addVehicle(addVehicleRequest);
         }catch (Exception exception){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,exception.getMessage());
             
@@ -27,9 +25,9 @@ public class VehicleController {
     }
 
     @PutMapping("/admin/editVehicle/{vehicleId}")
-    public Vehicle editVehicle(@PathVariable int vehicleId, @RequestBody Vehicle vehicle){
+    public Vehicle editVehicle(@PathVariable int vehicleId, @RequestBody EditVehicleRequest editVehicleRequest){
 		try {
-			return vehicleService.editVehicle(vehicleId, vehicle);
+			return vehicleService.editVehicle(vehicleId, editVehicleRequest);
 		} catch (Exception exception) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,exception.getMessage());
 		}

@@ -2,20 +2,18 @@ package com.examly.springapp.model;
 
 import com.examly.springapp.entity.User;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
+@Getter
 @AllArgsConstructor
-@NoArgsConstructor
-public class UserDetailsResponseModel {
-    private int id;
-    private String email;
-    private String name;
-    private String mobileNumber;
-    private String userRole;
+public class LoginResponse {
+    private final int id;
+    private final String email;
+    private final String name;
+    private final String mobileNumber;
+    private final String userRole;
 
-    public UserDetailsResponseModel(User userObject) {
+    public LoginResponse(User userObject) {
         this.id = userObject.getId();
         this.email = userObject.getEmail();
         this.name = userObject.getName();

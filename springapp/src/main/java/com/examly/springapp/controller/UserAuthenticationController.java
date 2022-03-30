@@ -1,8 +1,8 @@
 package com.examly.springapp.controller;
 
 import com.examly.springapp.entity.User;
-import com.examly.springapp.model.LoginModel;
-import com.examly.springapp.model.UserDetailsResponseModel;
+import com.examly.springapp.model.LoginRequest;
+import com.examly.springapp.model.LoginResponse;
 import com.examly.springapp.service.AuthenticationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,9 +28,9 @@ public class UserAuthenticationController {
     }
 
     @PostMapping(path = "/authenticate")
-    public ResponseEntity<UserDetailsResponseModel> authentication(@RequestBody LoginModel loginModel) {
+    public ResponseEntity<LoginResponse> authentication(@RequestBody LoginRequest loginRequest) {
         try {
-            return authenticationService.authentication(loginModel);
+            return authenticationService.authentication(loginRequest);
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
