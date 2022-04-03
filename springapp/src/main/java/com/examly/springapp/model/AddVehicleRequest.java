@@ -14,7 +14,6 @@ public class AddVehicleRequest {
     private final String address;
     private final String description;
     private final String availableStatus;
-    @JsonFormat(pattern="HH:mm:ss")
     private final Time time;
     private final int capacity;
     private final double ticketPrice;

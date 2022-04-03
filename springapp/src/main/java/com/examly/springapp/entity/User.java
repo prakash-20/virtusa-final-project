@@ -1,5 +1,6 @@
 package com.examly.springapp.entity;
 
+import com.examly.springapp.model.SignUpRequest;
 import com.examly.springapp.security.utils.ApplicationUserRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -45,12 +46,16 @@ public class User implements UserDetails {
     @Column(name = "user_role")
     private String userRole;
 
-    public User(String email, String password, String name, String mobileNumber, String userRole) {
+    private User(String email, String password, String name, String mobileNumber, String userRole) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.mobileNumber = mobileNumber;
         this.userRole = userRole;
+    }
+
+    public User(SignUpRequest signUpRequest) {
+        this(signUpRequest.getEmail(),signUpRequest.getPassword(),signUpRequest.getName(),signUpRequest.getMobileNumber(),signUpRequest.getUserRole());
     }
 
     @Override

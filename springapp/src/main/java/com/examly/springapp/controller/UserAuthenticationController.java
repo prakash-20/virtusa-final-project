@@ -3,6 +3,7 @@ package com.examly.springapp.controller;
 import com.examly.springapp.entity.User;
 import com.examly.springapp.model.LoginRequest;
 import com.examly.springapp.model.LoginResponse;
+import com.examly.springapp.model.SignUpRequest;
 import com.examly.springapp.service.AuthenticationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,9 +20,9 @@ public class UserAuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping(path = "/signup")
-    public String register(@RequestBody User user) {
+    public String register(@RequestBody SignUpRequest signUpRequest) {
         try {
-            return authenticationService.register(user);
+            return authenticationService.register(signUpRequest);
         } catch (Exception exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
         }

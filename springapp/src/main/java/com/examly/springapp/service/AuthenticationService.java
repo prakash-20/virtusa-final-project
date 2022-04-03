@@ -3,6 +3,7 @@ package com.examly.springapp.service;
 import com.examly.springapp.entity.User;
 import com.examly.springapp.model.LoginRequest;
 import com.examly.springapp.model.LoginResponse;
+import com.examly.springapp.model.SignUpRequest;
 import com.examly.springapp.repository.UserRepository;
 import com.examly.springapp.security.jwt.JwtUtil;
 import lombok.AllArgsConstructor;
@@ -24,13 +25,14 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    public String register(User user){
-        boolean emailExist = userRepository.findByEmail(user.getEmail()).isPresent();
+    public String register(SignUpRequest signUpRequest){
+        boolean emailExist = userRepository.findByEmail(signUpRequest.getEmail()).isPresent();
         if (emailExist) throw new IllegalStateException("this email is already registered");
-        if(!validUserRole(user.getUserRole())) throw new IllegalStateException("user role not valid");
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if(!validUserRole(signUpRequest.getUserRole())) throw new IllegalStateException("user role not valid");
+        User user = new User(signUpRequest);
+        user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         userRepository.save(user);
-        return capitalize(user.getUserRole())+" added";
+        return capitalize(signUpRequest.getUserRole())+" added";
     }
 
     public ResponseEntity<LoginResponse> authentication(LoginRequest loginRequest) throws BadCredentialsException {

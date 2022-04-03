@@ -10,9 +10,7 @@ import java.util.Set;
 @Getter
 @AllArgsConstructor
 public class CreateBookingRequest {
-    @JsonFormat(pattern="yyyy-MM-dd")
     private final Date fromDate;
-    @JsonFormat(pattern="yyyy-MM-dd")
     private final Date toDate;
     private final int numberOfPassenger;
     private final double totalPrice;
